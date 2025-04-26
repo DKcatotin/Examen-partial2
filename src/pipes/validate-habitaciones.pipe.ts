@@ -10,15 +10,17 @@ export class ValidateHabitacionesPipe implements PipeTransform {
     private readonly habitacionRepository: Repository<Habitacion>,
   ) {}
 
-  async transform(value: any, { metatype }: ArgumentMetadata) {
-    // Suponiendo que las habitaciones vienen como un arreglo de ids
-    const habitacionesIds = value.habitaciones;
-    const habitaciones = await this.habitacionRepository.findByIds(habitacionesIds);
+  async transform(value: any) {
+    const { habitacionesIds } = value;
 
-    if (habitaciones.length !== habitacionesIds.length) {
-      throw new BadRequestException('Una o más habitaciones no existen');
+    if (!habitacionesIds || habitacionesIds.length === 0) {
+      throw new BadRequestException('habitacionesIds no puede estar vacío');
     }
 
+    const habitaciones = await this.habitacionRepository.findByIds(habitacionesIds);
+    if (habitaciones.length !== habitacionesIds.length) {
+      throw new BadRequestException('Una o más habitaciones no existen.');
+    }
     return value;
   }
 }
