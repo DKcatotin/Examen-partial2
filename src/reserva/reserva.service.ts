@@ -25,19 +25,18 @@ export class ReservasService {
   async create(createReservaDto: CreateReservaDto) {
     const { clienteId, fechaInicio, fechaFin, habitacionesIds } = createReservaDto;
 
-    // Validar que el cliente existe
     const cliente = await this.clienteRepository.findOne({ where: { id: clienteId } });
     if (!cliente) {
       throw new NotFoundException(`Cliente con id ${clienteId} no encontrado.`);
     }
 
-    // Validar que las habitaciones existen
+    
     const habitaciones = await this.habitacionRepository.findByIds(habitacionesIds);
     if (habitaciones.length !== habitacionesIds.length) {
       throw new BadRequestException('Una o más habitaciones no existen.');
     }
 
-    // Validar disponibilidad de habitaciones
+   
     for (const habitacion of habitaciones) {
       const reservasExistentes = await this.reservaRepository
         .createQueryBuilder('reserva')
@@ -54,13 +53,13 @@ export class ReservasService {
       }
     }
 
-    // Usar transacciones para asegurar la coherencia de los datos
+    
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Crear la reserva
+     
       const reserva = this.reservaRepository.create({
         cliente,
         fechaInicio,
@@ -68,19 +67,19 @@ export class ReservasService {
         habitaciones,
       });
 
-      // Guardar la reserva dentro de la transacción
+     
       await queryRunner.manager.save(reserva);
 
-      // Confirmar transacción
+      
       await queryRunner.commitTransaction();
 
       return reserva;
     } catch (error) {
-      // Deshacer cambios si algo falla
+     
       await queryRunner.rollbackTransaction();
       throw new BadRequestException('No se pudo crear la reserva debido a un error interno.');
     } finally {
-      // Liberar los recursos del queryRunner
+      
       await queryRunner.release();
     }
   }

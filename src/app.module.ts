@@ -8,9 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Cliente } from './cliente/entities/cliente.entity';
 import { Habitacion } from './habitacion/entities/habitacion.entity';
 import { Reserva } from './reserva/entities/reserva.entity';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
 
 @Module({
   imports: [
